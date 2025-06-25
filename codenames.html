@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<title>Codenames AZ</title>
+<style>
+  body{background:#333;color:#eee;font-family:Arial,sans-serif;text-align:center;margin:0;padding:20px;}
+  #board{display:grid;grid-template-columns:repeat(5,1fr);grid-gap:10px;max-width:800px;margin:20px auto;}
+  .card{padding:15px;border:1px solid #555;cursor:pointer;background:#444;color:#eee;min-height:60px;display:flex;align-items:center;justify-content:center;user-select:none;}
+  .card.revealed{cursor:default;}
+  .red{background:#b53737;}
+  .blue{background:#3757b5;}
+  .neutral{background:#777;}
+  .assassin{background:#000;color:#fff;}
+  button{margin:5px;padding:10px 20px;font-size:16px;}
+</style>
+</head>
+<body>
+<h1>Codenames (Azerbaijanca)</h1>
+<div>
+<button id="toggle">Casus baxışı</button>
+<button id="newgame">Yeni oyun</button>
+</div>
+<div id="board"></div>
+<script>
+const WORDS=[
+"alma","armud","banan","porta\u011fal","nar","\u00fcz\u00fcm","\u00e7iy\u0259l\u0259k","gilas","\u015faftal\u0131","qarp\u0131z","qovun","ananas","limon","mandarin","albal\u0131","moruq","b\u00f6y\u00fcrt\u0259k\u0259n","feyxoa","heyva","\u0259rik","kivi","pomidor","xiyar","bad\u0131mcan","kartof","so\u011fan","sar\u0131msaq","yerk\u00f6k\u00fc","k\u0259l\u0259m","turp","bib\u0259r","g\u00f6b\u0259l\u0259k","balqabaq","ispanaq","\u00e7u\u011fundur","brokkoli","noxud","lobya","d\u00fcy\u00fc","makaron","yumurta","toyuq","mal \u0259ti","qoyun \u0259ti","bal\u0131q","kolbasa","pendir","ya\u011f","k\u0259r\u0259 ya\u011f\u0131","qat\u0131q","s\u00fcd","kefir","\u015firinlik","\u015f\u0259k\u0259r","q\u0259nnad\u0131","pe\u00e7enye","tort","dondurma","\u00e7ay","q\u0259h\u0259v\u0259","kompot","\u015fokolad","su","meyv\u0259 suyu","limonad","qar","ya\u011f\u0131\u015f","k\u00fcl\u0259k","g\u00fcn\u0259\u015f","bulud","d\u0259niz","\u00e7im\u0259rlik","da\u011f","me\u015f\u0259","\u00e7ay ax\u0131n","g\u00f6l","\u015f\u0259lal\u0259","ada","\u00e7\u00f6l","\u015f\u0259h\u0259r","k\u0259nd","ev","otaq","m\u0259tb\u0259x","hamam","qap\u0131","p\u0259nc\u0259r\u0259","divar","tavan","m\u0259kt\u0259b","universitet","kitab","d\u0259ft\u0259r","q\u0259l\u0259m","qrafik","m\u0259llim","t\u0259l\u0259b\u0259","ofis","stol","stul","komp\u00fcter","telefon","televizor","fotoapparat","kamera","radio","musiqi","mahn\u0131","na\u011fara","gitara","pianino","teatr","kino","oyun","futbol","basketbol","voleybol","\u00fczg\u00fcc\u00fcl\u00fck","idman","qa\u00e7\u0131\u015f","velosiped","avtobus","ma\u015f\u0131n","qatar","t\u0259yyar\u0259","bilet","\u00e7emodan","pasport","otel","x\u0259rit\u0259","sahil","park","meydan","k\u00f6rp\u00fc","\u0259sg\u0259r","polis","h\u0259kim","m\u0259llim\u0259","m\u00fch\u0259ndis","proqram\u00e7\u0131","\u015fair","yaz\u0131\u00e7\u0131","r\u0259ssam","heyk\u0259lt\u0259ra\u015f","jurnalist","idman\u00e7\u0131","dost","ail\u0259","ata","ana","qarda\u015f","bac\u0131","u\u015faq","qoca","g\u0259nc","be\u015fik","yataq","masa","lampa","kitabxana","muzey","market","bazar","d\u00fckkan","xestexana","aptek","bank","po\u00e7t","m\u0259ktub","ba\u011f","a\u011fac","\u00e7i\u00e7\u0259k","ot","yarpaq","budaq","meyv\u0259","toxum","torpaq","hava","zaman","s\u0259h\u0259r","g\u00fcnorta","ax\u015fam","gec\u0259","h\u0259ft\u0259","ay","il","bayram","ad g\u00fcn\u00fc","yubiley","toy","oyun\u00e7aq","h\u0259diyy\u0259","qutu","z\u0259ng","saat","pul","kart","x\u0259b\u0259rl\u0259r","dostluq","sirr","sevgi","qalib","m\u0259\u011flub","t\u0259hl\u00fck\u0259"];let assignments=[];
+let revealed=[];
+let spymaster=false;
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function setup(){const pool=shuffle(WORDS.slice()).slice(0,25);assignments=[];for(let i=0;i<9;i++)assignments.push("red");for(let i=0;i<8;i++)assignments.push("blue");for(let i=0;i<7;i++)assignments.push("neutral");assignments.push("assassin");assignments=shuffle(assignments);revealed=Array(25).fill(false);const board=document.getElementById("board");board.innerHTML="";pool.forEach((w,i)=>{const d=document.createElement("div");d.className="card";d.textContent=w;d.addEventListener("click",()=>reveal(i,d));board.appendChild(d);});}
+function reveal(i,d){if(revealed[i])return;revealed[i]=true;d.classList.add(assignments[i],"revealed");if(assignments[i]==="assassin")alert("Qatil seçildi! Oyun bitdi.");}
+function toggle(){spymaster=!spymaster;document.querySelectorAll(".card").forEach((d,i)=>{if(spymaster||revealed[i])d.classList.add(assignments[i]);else d.classList.remove("red","blue","neutral","assassin");});}
+document.getElementById("toggle").addEventListener("click",toggle);
+document.getElementById("newgame").addEventListener("click",()=>{spymaster=false;setup();});
+setup();
+</script>
+</body>
+</html>
